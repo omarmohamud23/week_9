@@ -15,6 +15,14 @@
 
         <!-- TODO show errors from form validation -->
 
+        <div class="alert alert-danger" v-show = "errors.length > 0" >
+            <ul>
+             <li v-for = "error in errors" v-bind:key="error">
+                 {{ error }} 
+                </li>
+            </ul>
+        </div>
+
 
         <div class="card add-student m-2 p-2">
             <h4 class="card-title">Add new student</h4>
@@ -22,15 +30,15 @@
             <div class="form-group">
                 <label for="name">Name</label>
                 <!-- TODO v-model newStudentName -->
-                <input id="name" class="form-control">
+                <input id="name" class="form-control" v-model.trim="newStudentName">
             </div>
             <div class="form-group">
                 <label for="starID">Star ID</label>
                 <!-- TODO v-model newStarID -->
-                <input id="starID" class="form-control">
+                <input id="starID" class="form-control" v-model.trim ="newStarID">
             </div>
             <!-- TODO v-on:click event handler -->
-            <button class="btn btn-primary">Add</button>
+            <button class="btn btn-primary" v-on:click = "addStudent">Add</button>
         </div>
 
         <div class="card student-list m-2 p-2">
@@ -47,20 +55,100 @@
                    Each row will have a checkbox, bound to the app's data 
                    When the checkbox is checked/unchecked, the student will be signed in/out -->
 
+         <tr v-for ="student in students" v-bind:key="student.starID"  v-bind:class="{ present: student.present, absent: !student.present }">
+                       <td>{{student.name}}</td>
+                       <td>{{student.starID}}</td>
+                       <td>
+                           <input type="checkbox" v-model= "student.present" v-on:change= "arrivedOrleft(student)">
+                       </td>
+
+                   </tr>
+
                 </table>
             </div>
         </div>
 
 
         <!-- TODO show a message when student arrives or leaves  -->
+        <div v-show= "mostRecentStudent.name">
+        <div v-if ="mostRecentStudent.present" class="alert alert-dark">
+            Welcome, {{mostRecentStudent.name}}
+        </div>
+            <div v-else class="alert alert-primary">
+                Goodbye, {{mostRecentStudent.name}}. See you later!
+
+            </div>
+    
+        </div>
 
 
-    </div>
+    </div> 
 
     <script>
 
 
         // TODO Vue app     
+
+        let app = new Vue ({
+            el: '#app',
+            data:{
+                newStudentName: '',
+                newStarID: '',
+                students:[
+                    { name: 'student A', starID: 'aa1234aa', present:false},
+                    { name: 'student B', starID: 'cc5678cc', present:false}
+                    
+                ],
+                errors: [] ,
+                mostRecentStudent:{}
+                
+            },
+            methods:{
+                addStudent() {
+                    //this.newStarID = this.newStarID.trim()
+                   // this.newStudentName = this.newStudentName.trim()
+
+                    this.errors = []
+
+                    if (!this.newStudentName) {
+                        this.errors.push('Student Name is required')
+
+                    }
+
+                    if (!this.newStarID) {
+                        this.errors.push('StarID is required')
+                    }
+                    
+
+                    if (this.errors.length == 0) {
+                        let student = { 
+                        name: this.newStudentName, 
+                        starID: this.newStarID,
+                        present:false 
+                    }
+                    
+                    this.students.push(student)
+
+                    this.students.sort( function (s1, s2){
+                        return s1.name.toLowerCase() > s2.name.toLowerCase() ? 1 : -1
+                    })
+
+                    this.newStudentName = ''
+                    this.newStarID = ''
+
+                   
+                    
+                }
+
+            },arrivedOrleft(student) {
+                this.mostRecentStudent = student
+            }
+
+        
+            }
+
+        }) 
+        
 
 
     </script>
